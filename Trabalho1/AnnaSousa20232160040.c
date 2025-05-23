@@ -159,7 +159,31 @@ DiasMesesAnos q2(char datainicial[], char datafinal[])
  */
 int q3(char *texto, char c, int isCaseSensitive)
 {
-    int qtdOcorrencias = -1;
+    int qtdOcorrencias = 0;
+    int i;
+    char copiatexto[250];
+
+    strcpy(copiatexto, texto);
+
+    if(isCaseSensitive){
+      for(i = 0; texto[i] != '\0'; i++){
+         if(texto[i] == c)
+              qtdOcorrencias++;        
+          }
+        }else{
+          if(c >= 65 && c <= 90)
+            c += 32;
+
+          for(i = 0; copiatexto[i] != '\0'; i++){
+            if(copiatexto[i] >= 65 && copiatexto[i] <= 90)
+              copiatexto[i] += 32;
+          }
+
+          for(i = 0; copiatexto[i] != '\0'; i++){
+            if(copiatexto[i] == c)
+              qtdOcorrencias++;
+          }
+        }
 
     return qtdOcorrencias;
 }
@@ -181,7 +205,38 @@ int q3(char *texto, char c, int isCaseSensitive)
  */
 int q4(char *strTexto, char *strBusca, int posicoes[30])
 {
-    int qtdOcorrencias = -1;
+    int qtdOcorrencias = 0;
+    int i, j, k = 0;
+    int iposicao, fposicao;
+    wchar_t copiaT[250];
+    wchar_t copiaB[50];
+
+    setlocale(LC_ALL, "");
+
+    mbstowcs(copiaT, strTexto, 250);
+    mbstowcs(copiaB, strBusca, 50);
+
+
+    for(i = 0, j = 0; copiaT[i] != '\0'; i++){
+      if(copiaT[i] == copiaB[j]){
+        if(j == 0){
+          iposicao = i + 1;
+        }
+
+        j++;
+      } else{
+        j = 0;
+      }
+
+      if(copiaB[j] == '\0'){
+        qtdOcorrencias++;
+        posicoes[k] = iposicao;
+        k++;
+        posicoes[k] = i + 1;
+        k++;
+        j = 0;
+      }
+    }
 
     return qtdOcorrencias;
 }
@@ -220,7 +275,17 @@ int q5(int num)
 
 int q6(int numerobase, int numerobusca)
 {
-    int qtdOcorrencias;
+    int qtdOcorrencias = 0;
+    char strBase[50], strBusca[50];
+    sprintf(strBase, "%d", numerobase);  
+    sprintf(strBusca, "%d", numerobusca); 
+
+        for (int i = 0; strBase[i] != '\0'; i++) {
+            if (strBase[i] == strBusca[0]) {
+                qtdOcorrencias++; 
+            }
+        }
+	
     return qtdOcorrencias;
 }
 

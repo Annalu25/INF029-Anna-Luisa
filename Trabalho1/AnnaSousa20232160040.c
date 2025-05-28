@@ -90,19 +90,53 @@ int teste(int a)
     Não utilizar funções próprias de string (ex: strtok)   
     pode utilizar strlen para pegar o tamanho da string
  */
-int q1(char data[])
-{
-  int datavalida = 1;
 
-  //quebrar a string data em strings sDia, sMes, sAno
+      int q1(char data[]){
+      int datavalida = 1;
+      int i, j;
+      char copia[5];
+      int dia, mes, ano;
+      DataQuebrada dma;
 
+      dma = separadata(data);
+      if(!dma.valido)
+        return 0;
 
-  //printf("%s\n", data);
+      //Teste para os dias
 
-  if (datavalida)
-      return 1;
-  else
-      return 0;
+      if(dma.iMes == 4 || dma.iMes == 6 || dma.iMes == 9 || dma.iMes == 11){
+        if(dma.iDia < 1 || dma.iDia > 30){
+          datavalida = 0;
+        }
+      } else if(dma.iMes != 2){
+        if(dma.iDia < 1 || dma.iDia > 31){
+          datavalida = 0;
+        }
+      }
+
+      if(bissexto(dma.iAno)){
+        if(dma.iMes == 2 && (dma.iDia < 1 || dma.iDia > 29)){
+          datavalida = 0;
+        }
+      } else {
+        if(dma.iMes == 2 && (dma.iDia < 1 || dma.iDia > 28)){
+          datavalida = 0;
+        }
+      }
+
+      //Teste para os meses
+
+      if(dma.iMes < 1 || dma.iMes > 12){
+        datavalida = 0;
+      }
+
+      //Teste para o ano
+
+      if(dma.iAno <= 0){
+        datavalida = 0;
+      }
+
+      return datavalida;
 }
 
 
@@ -123,29 +157,79 @@ int q1(char data[])
  */
 DiasMesesAnos q2(char datainicial[], char datafinal[])
 {
+        DataQuebrada idata, fdata;
+        int DiasMes[13] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+        //calcule os dados e armazene nas três variáveis a seguir
+        DiasMesesAnos dma = {0,0,0,0};
 
-    //calcule os dados e armazene nas três variáveis a seguir
-    DiasMesesAnos dma;
+        if (q1(datainicial) == 0){
+          dma.retorno = 2;
+          return dma;
+        }else if (q1(datafinal) == 0){
+          dma.retorno = 3;
+          return dma;
+        }else{
+          //verifique se a data final não é menor que a data inicial
+          idata = separadata(datainicial);
+          fdata = separadata(datafinal);
 
-    if (q1(datainicial) == 0){
-      dma.retorno = 2;
-      return dma;
-    }else if (q1(datafinal) == 0){
-      dma.retorno = 3;
-      return dma;
-    }else{
-      //verifique se a data final não é menor que a data inicial
-      
-      //calcule a distancia entre as datas
+          if(idata.iAno > fdata.iAno){
+            dma.retorno = 4;
+            return dma;
+          } else if(idata.iAno == fdata.iAno){
+            if(idata.iMes > fdata.iMes){
+              dma.retorno = 4;
+              return dma;
+            } else if(idata.iMes == fdata.iMes){
+              if(idata.iDia > fdata.iDia){
+                dma.retorno = 4;
+                return dma;
+              }
+            }
+          }
+
+          //calcule a distancia entre as datas      
+          for(dma.qtdAnos = 0; idata.iAno + dma.qtdAnos != fdata.iAno; dma.qtdAnos++);
+
+          if(bissexto(fdata.iAno)) DiasMes[2] = 29;
+
+          if(idata.iMes == 2 && idata.iDia == 29 && fdata.iMes == 2 && fdata.iDia == 28 && bissexto(fdata.iAno) == 0)
+              idata.iDia--;
+            else if(fdata.iMes == 2 && fdata.iDia == 29 && idata.iMes == 2 && idata.iDia == 28 && bissexto(idata.iAno) == 0)
+              fdata.iDia--;
+
+          if((idata.iMes < fdata.iMes) || (idata.iMes == fdata.iMes && idata.iDia <= fdata.iDia)){
+              for(dma.qtdMeses = 0; idata.iMes + dma.qtdMeses != fdata.iMes; dma.qtdMeses++);
+              if(idata.iDia <= fdata.iDia){
+                  dma.qtdDias = fdata.iDia - idata.iDia;
+              } else{
+                  dma.qtdMeses--;
+                  dma.qtdDias = DiasMes[idata.iMes + dma.qtdMeses] - idata.iDia + fdata.iDia;
+              }
+
+          } else{
+              dma.qtdAnos--;
 
 
-      //se tudo der certo
-      dma.retorno = 1;
-      return dma;
-      
-    }
-    
+              if(idata.iDia > fdata.iDia){
+                dma.qtdMeses = 12 - idata.iMes + fdata.iMes - 1;
+                dma.qtdDias = DiasMes[dma.qtdMeses+1] - (idata.iDia - fdata.iDia);
+              } else{
+                dma.qtdMeses = 12 - idata.iMes + fdata.iMes;
+                dma.qtdDias = fdata.iDia - idata.iDia;
+              }
+            }
+
+           // printf("\nfDias: %d Meses: %d Anos: %d\n", dma.qtdDias, dma.qtdMeses, dma.qtdAnos);
+
+          //se tudo der certo
+          dma.retorno = 1;
+          return dma;
+
+        }
+
 }
+
 
 /*
  Q3 = encontrar caracter em texto
@@ -301,9 +385,73 @@ int q6(int numerobase, int numerobusca)
 
  int q7(char matriz[8][10], char palavra[5])
  {
-     int achou;
-     return achou;
- }
+    int linhas = 8, colunas = 10;
+    int len = strlen(palavra);
+    int i, j, k;
+    int achou = 0; 
+
+    for (i = 0; i < linhas && !achou; i++) {
+        for (j = 0; j < colunas && !achou; j++) {
+            if (j + len <= colunas) {
+                for (k = 0; k < len; k++)
+                    if (matriz[i][j + k] != palavra[k])
+                        break;
+                if (k == len) achou = 1;
+            }
+
+            if (!achou && j - len + 1 >= 0) {
+                for (k = 0; k < len; k++)
+                    if (matriz[i][j - k] != palavra[k])
+                        break;
+                if (k == len) achou = 1;
+            }
+
+            if (!achou && i + len <= linhas) {
+                for (k = 0; k < len; k++)
+                    if (matriz[i + k][j] != palavra[k])
+                        break;
+                if (k == len) achou = 1;
+            }
+		
+            if (!achou && i - len + 1 >= 0) {
+                for (k = 0; k < len; k++)
+                    if (matriz[i - k][j] != palavra[k])
+                        break;
+                if (k == len) achou = 1;
+            }
+		
+            if (!achou && i + len <= linhas && j + len <= colunas) {
+                for (k = 0; k < len; k++)
+                    if (matriz[i + k][j + k] != palavra[k])
+                        break;
+                if (k == len) achou = 1;
+            }
+
+            if (!achou && i - len + 1 >= 0 && j - len + 1 >= 0) {
+                for (k = 0; k < len; k++)
+                    if (matriz[i - k][j - k] != palavra[k])
+                        break;
+                if (k == len) achou = 1;
+            }
+
+            if (!achou && i - len + 1 >= 0 && j + len <= colunas) {
+                for (k = 0; k < len; k++)
+                    if (matriz[i - k][j + k] != palavra[k])
+                        break;
+                if (k == len) achou = 1;
+            }
+
+            if (!achou && i + len <= linhas && j - len + 1 >= 0) {
+                for (k = 0; k < len; k++)
+                    if (matriz[i + k][j - k] != palavra[k])
+                        break;
+                if (k == len) achou = 1;
+            }
+        }
+    }
+
+    return achou;
+}
 
 
 
@@ -364,3 +512,41 @@ DataQuebrada quebraData(char data[]){
     
   return dq;
 }
+
+DataQuebrada separadata(char data[]){
+    int i, j;
+    char copia[5];
+    DataQuebrada dma;
+    dma.valido = 1;
+
+      for(i = 0, j = 0; data[i] != '/'; i++, j++){
+        copia[j] = data[i];
+        if(j > 2) dma.valido = 0;
+      }
+      copia[j] = '\0';
+
+      dma.iDia = atoi(copia);
+
+      for(i += 1, j = 0; data[i] != '/'; i++, j++){
+        copia[j] = data[i];
+        if(j > 2) dma.valido = 0;
+      }
+      copia[j] = '\0';
+
+      dma.iMes = atoi(copia);
+
+      for(i += 1, j = 0; data[i] != '\0'; i++, j++){
+        copia[j] = data[i];
+      }
+      copia[j] = '\0';
+
+      dma.iAno = atoi(copia);
+      if(dma.iAno > 0 && dma.iAno < 100)
+        dma.iAno += 2000;
+
+      return dma;
+    }
+
+    int bissexto(int ano){
+      return (ano % 4 == 0 && ano % 100 != 0) || ano % 400 == 0;
+    }

@@ -24,6 +24,8 @@
 #include <stdio.h>
 #include "AnnaSousa20232160040.h" // Substitua pelo seu arquivo de header renomeado
 #include <stdlib.h>
+#include <string.h>
+#include <locale.h>
 
 DataQuebrada quebraData(char data[]);
 
@@ -77,6 +79,64 @@ int teste(int a)
     return val;
 }
 
+DataQuebrada quebraData(char data[]){
+  DataQuebrada dq;
+  char sDia[3];
+    char sMes[3];
+    char sAno[5];
+    int i; 
+
+    for (i = 0; data[i] != '/'; i++){
+        sDia[i] = data[i];	
+    }
+    if(i == 1 || i == 2){ // testa se tem 1 ou dois digitos
+        sDia[i] = '\0';  // coloca o barra zero no final
+    }else {
+        dq.valido = 0;
+    return dq;
+  }  
+
+
+    int j = i + 1; //anda 1 cada para pular a barra
+    i = 0;
+
+    for (; data[j] != '/'; j++){
+        sMes[i] = data[j];
+        i++;
+    }
+
+    if(i == 1 || i == 2){ // testa se tem 1 ou dois digitos
+        sMes[i] = '\0';  // coloca o barra zero no final
+    }else {
+        dq.valido = 0;
+    return dq;
+  }
+
+
+    j = j + 1; //anda 1 cada para pular a barra
+    i = 0;
+
+    for(; data[j] != '\0'; j++){
+        sAno[i] = data[j];
+        i++;
+    }
+
+    if(i == 2 || i == 4){ // testa se tem 2 ou 4 digitos
+        sAno[i] = '\0';  // coloca o barra zero no final
+    }else {
+        dq.valido = 0;
+    return dq;
+  }
+
+  dq.iDia = atoi(sDia);
+  dq.iMes = atoi(sMes);
+  dq.iAno = atoi(sAno); 
+
+    dq.valido = 1;
+
+  return dq;
+}
+
 /*
  Q1 = validar data
 @objetivo
@@ -91,7 +151,45 @@ int teste(int a)
     pode utilizar strlen para pegar o tamanho da string
  */
 
-      int q1(char data[]){
+DataQuebrada separadata(char data[]){
+    int i, j;
+    char copia[5];
+    DataQuebrada dma;
+    dma.valido = 1;
+
+      for(i = 0, j = 0; data[i] != '/'; i++, j++){
+        copia[j] = data[i];
+        if(j > 2) dma.valido = 0;
+      }
+      copia[j] = '\0';
+
+      dma.iDia = atoi(copia);
+
+      for(i += 1, j = 0; data[i] != '/'; i++, j++){
+        copia[j] = data[i];
+        if(j > 2) dma.valido = 0;
+      }
+      copia[j] = '\0';
+
+      dma.iMes = atoi(copia);
+
+      for(i += 1, j = 0; data[i] != '\0'; i++, j++){
+        copia[j] = data[i];
+      }
+      copia[j] = '\0';
+
+      dma.iAno = atoi(copia);
+      if(dma.iAno > 0 && dma.iAno < 100)
+        dma.iAno += 2000;
+
+      return dma;
+    }
+
+    int bissexto(int ano){
+      return (ano % 4 == 0 && ano % 100 != 0) || ano % 400 == 0;
+    }
+
+    int q1(char data[]){
       int datavalida = 1;
       int i, j;
       char copia[5];
@@ -157,7 +255,7 @@ int teste(int a)
  */
 DiasMesesAnos q2(char datainicial[], char datafinal[])
 {
-        DataQuebrada idata, fdata;
+    DataQuebrada idata, fdata;
         int DiasMes[13] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
         //calcule os dados e armazene nas três variáveis a seguir
         DiasMesesAnos dma = {0,0,0,0};
@@ -230,7 +328,6 @@ DiasMesesAnos q2(char datainicial[], char datafinal[])
 
 }
 
-
 /*
  Q3 = encontrar caracter em texto
  @objetivo
@@ -244,14 +341,14 @@ DiasMesesAnos q2(char datainicial[], char datafinal[])
 int q3(char *texto, char c, int isCaseSensitive)
 {
     int qtdOcorrencias = 0;
-    int i;
-    char copiatexto[250];
+        int i;
+        char copiatexto[250];
 
-    strcpy(copiatexto, texto);
+        strcpy(copiatexto, texto);
 
-    if(isCaseSensitive){
-      for(i = 0; texto[i] != '\0'; i++){
-         if(texto[i] == c)
+        if(isCaseSensitive){
+          for(i = 0; texto[i] != '\0'; i++){
+            if(texto[i] == c)
               qtdOcorrencias++;        
           }
         }else{
@@ -267,9 +364,10 @@ int q3(char *texto, char c, int isCaseSensitive)
             if(copiatexto[i] == c)
               qtdOcorrencias++;
           }
+
         }
 
-    return qtdOcorrencias;
+        return qtdOcorrencias;
 }
 
 /*
@@ -322,6 +420,7 @@ int q4(char *strTexto, char *strBusca, int posicoes[30])
       }
     }
 
+
     return qtdOcorrencias;
 }
 
@@ -343,7 +442,7 @@ int q5(int num)
         invertido = invertido * 10 + digito;  
     }
     num = invertido;
-	
+    
     return num;
 }
 
@@ -359,18 +458,33 @@ int q5(int num)
 
 int q6(int numerobase, int numerobusca)
 {
-    int qtdOcorrencias = 0;
-    char strBase[50], strBusca[50];
-    sprintf(strBase, "%d", numerobase);  
-    sprintf(strBusca, "%d", numerobusca); 
-
-        for (int i = 0; strBase[i] != '\0'; i++) {
-            if (strBase[i] == strBusca[0]) {
-                qtdOcorrencias++; 
-            }
+    int qtdocorrencias = 0;
+    int digitos_busca = 0;
+    int copia_busca = numerobusca;
+    if (numerobusca == 0) {
+        digitos_busca = 1;
+    } else {
+        while (copia_busca > 0) {
+            copia_busca /= 10;
+            digitos_busca++;
         }
-	
-    return qtdOcorrencias;
+    }
+
+    int divisor = 1;
+    for (int i = 1; i < digitos_busca; i++) {
+        divisor *= 10;
+    }
+
+    int copia_base = numerobase;
+    while (copia_base >= divisor) {
+        int parte = copia_base % (divisor * 10);
+        if (parte == numerobusca) {
+            qtdocorrencias++;
+        }
+        copia_base /= 10;
+    }
+
+    return qtdocorrencias;
 }
 
 /*
@@ -452,101 +566,3 @@ int q6(int numerobase, int numerobusca)
 
     return achou;
 }
-
-
-
-DataQuebrada quebraData(char data[]){
-  DataQuebrada dq;
-  char sDia[3];
-	char sMes[3];
-	char sAno[5];
-	int i; 
-
-	for (i = 0; data[i] != '/'; i++){
-		sDia[i] = data[i];	
-	}
-	if(i == 1 || i == 2){ // testa se tem 1 ou dois digitos
-		sDia[i] = '\0';  // coloca o barra zero no final
-	}else {
-		dq.valido = 0;
-    return dq;
-  }  
-	
-
-	int j = i + 1; //anda 1 cada para pular a barra
-	i = 0;
-
-	for (; data[j] != '/'; j++){
-		sMes[i] = data[j];
-		i++;
-	}
-
-	if(i == 1 || i == 2){ // testa se tem 1 ou dois digitos
-		sMes[i] = '\0';  // coloca o barra zero no final
-	}else {
-		dq.valido = 0;
-    return dq;
-  }
-	
-
-	j = j + 1; //anda 1 cada para pular a barra
-	i = 0;
-	
-	for(; data[j] != '\0'; j++){
-	 	sAno[i] = data[j];
-	 	i++;
-	}
-
-	if(i == 2 || i == 4){ // testa se tem 2 ou 4 digitos
-		sAno[i] = '\0';  // coloca o barra zero no final
-	}else {
-		dq.valido = 0;
-    return dq;
-  }
-
-  dq.iDia = atoi(sDia);
-  dq.iMes = atoi(sMes);
-  dq.iAno = atoi(sAno); 
-
-	dq.valido = 1;
-    
-  return dq;
-}
-
-DataQuebrada separadata(char data[]){
-    int i, j;
-    char copia[5];
-    DataQuebrada dma;
-    dma.valido = 1;
-
-      for(i = 0, j = 0; data[i] != '/'; i++, j++){
-        copia[j] = data[i];
-        if(j > 2) dma.valido = 0;
-      }
-      copia[j] = '\0';
-
-      dma.iDia = atoi(copia);
-
-      for(i += 1, j = 0; data[i] != '/'; i++, j++){
-        copia[j] = data[i];
-        if(j > 2) dma.valido = 0;
-      }
-      copia[j] = '\0';
-
-      dma.iMes = atoi(copia);
-
-      for(i += 1, j = 0; data[i] != '\0'; i++, j++){
-        copia[j] = data[i];
-      }
-      copia[j] = '\0';
-
-      dma.iAno = atoi(copia);
-      if(dma.iAno > 0 && dma.iAno < 100)
-        dma.iAno += 2000;
-
-      return dma;
-    }
-
-    int bissexto(int ano){
-      return (ano % 4 == 0 && ano % 100 != 0) || ano % 400 == 0;
-    }
